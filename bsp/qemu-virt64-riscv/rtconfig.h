@@ -74,7 +74,7 @@
 /* end of klibc options */
 #define RT_NAME_MAX 24
 #define RT_USING_SMP
-#define RT_CPUS_NR 2
+#define RT_CPUS_NR 1
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_256
 #define RT_THREAD_PRIORITY_MAX 256
@@ -326,6 +326,7 @@
 #define RT_USING_UTEST
 #define UTEST_THR_STACK_SIZE 4096
 #define UTEST_THR_PRIORITY 20
+#define RT_UTEST_MAX_OPTIONS 64
 #define RT_USING_RESOURCE_ID
 #define RT_USING_ADT
 #define RT_USING_ADT_AVL
@@ -392,13 +393,9 @@
 
 /* end of CPP11 */
 
-/* LwIP */
+/* Network */
 
-/* end of LwIP */
-
-/* Netdev */
-
-/* end of Netdev */
+/* end of Network */
 
 /* Utest Framework */
 
