@@ -89,6 +89,8 @@ void rt_hw_board_init(void)
 
     rt_hw_tick_init();
 
+    // ipi init
+    rt_hw_ipi_init();
 #ifdef RT_USING_COMPONENTS_INIT
     rt_components_board_init();
 #endif

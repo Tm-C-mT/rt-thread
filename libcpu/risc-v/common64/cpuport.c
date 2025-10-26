@@ -64,7 +64,13 @@ void *_rt_hw_stack_init(rt_ubase_t *sp, rt_ubase_t ra, rt_ubase_t sstatus)
 
 int rt_hw_cpu_id(void)
 {
+#ifndef RT_USING_SMP
     return 0;
+#else
+    uint32_t hart_id;
+    asm volatile ("csrr %0, satp" : "=r"(hart_id));
+    return hart_id;
+#endif /* RT_USING_SMP */
 }
 
 /**
@@ -117,6 +123,15 @@ void rt_hw_context_switch_interrupt(rt_ubase_t from, rt_ubase_t to, rt_thread_t 
 
     return;
 }
+#else
+void rt_hw_context_switch_interrupt(void *context, rt_ubase_t from, rt_ubase_t to, struct rt_thread *to_thread)
+{   
+    /* Perform architecture-specific context switch. This call will
+     * restore the target thread context and should not return when a
+     * switch is performed. The caller (scheduler) invoked this function
+     * in a context where local IRQs are disabled. */
+    rt_hw_context_switch((rt_ubase_t)from, (rt_ubase_t)to, to_thread);
+}
 #endif /* end of RT_USING_SMP */
 
 /** shutdown CPU */
@@ -137,3 +152,68 @@ void rt_hw_set_process_id(int pid)
 {
     // TODO
 }
+
+#ifdef RT_USING_SMP
+/**
+ * @brief Check and clear per-cpu irq switch flag
+ *
+ * This helper is used by the interrupt exit assembly to query whether a
+ * pending IRQ-time context switch has been requested for this hart. It
+ * clears the flag when found and returns 1. Returns 0 otherwise.
+ */
+int rt_percpu_check_irq_switch_flag(void)
+{
+    struct rt_cpu *pcpu = rt_cpu_self();
+    struct rt_thread *current_thread;
+    if (pcpu->irq_switch_flag)
+    {
+        current_thread = pcpu->current_thread;
+        
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+ * Boot secondary harts using the SBI HSM hart_start call.
+ * NOTE: this is a minimal implementation that uses the kernel _start
+ * physical address as the secondary entry. For production use you
+ * should provide a dedicated `rt_secondary_cpu_entry` that sets up
+ * a per-hart stack and performs the per-CPU init.
+ */
+extern void _start(void);
+extern int boot_hartid;
+void rt_hw_secondary_cpu_up(void)
+{
+    rt_uint64_t entry_pa;
+    int hart, ret;
+
+    /* translate kernel virtual _start to physical address */
+    entry_pa = (rt_uint64_t)&_start;//(rt_uint64_t)rt_kmem_v2p((void *)&_start);
+
+    for (hart = 0; hart < RT_CPUS_NR; hart++)
+    {
+        if (hart == boot_hartid) continue;
+
+        ret = sbi_hsm_hart_start((unsigned long)hart,
+                                 (unsigned long)entry_pa,
+                                 0UL);
+        if (ret)
+        {
+            rt_kprintf("sbi_hsm_hart_start failed for hart %d: %d\n", hart, ret);
+        }
+    }
+}
+
+void secondary_cpu_entry(void) 
+{
+    // /* Enable the Supervisor-Timer bit in SIE */
+    rt_hw_tick_init();
+    // ipi init
+    rt_hw_ipi_init();
+    rt_hw_spin_lock(&_cpus_lock);
+    /* invoke system scheduler start for secondary CPU */
+    rt_system_scheduler_start();
+}
+#endif /* RT_USING_SMP */

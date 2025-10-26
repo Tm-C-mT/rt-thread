@@ -31,10 +31,17 @@ _start:
         .dword 0
 1:
     /* save hartid */
+    csrw satp, a0
     la t0, boot_hartid                /* global varible rt_boot_hartid */
+    lw   t2, (t0)                     /* 读取 boot_hartid 当前值到 t2 */
+    li   t3, 0xdeadbeef               /* 将比较值 0xdeadbeef 加载到 t3 */
+    li   t4, 0xffffffff               /* 32 位掩码（用于提取低 32 位） */
+    and  t2, t2, t4                   /* t2 = t2 & 0xffffffff（只保留低 32 位） */
+    bne  t2, t3, skip_hartid_save     /* 若当前值为 0xdeadbeef，跳转到跳过赋值的位置 */
     mv t1, a0                         /* get hartid in S-mode frome a0 register */
     sw t1, (t0)                       /* store t1 register low 4 bits in memory address which is stored in t0 */
 
+skip_hartid_save:
     /* clear Interrupt Registers */
     csrw sie, 0
     csrw sip, 0
@@ -51,7 +58,9 @@ _start:
     li x7, 0
     li x8, 0
     li x9, 0
+#ifndef RT_USING_SMP
     li x10,0
+#endif
     li x11,0
     li x12,0
     li x13,0
@@ -85,10 +94,27 @@ _start:
     la gp, __global_pointer$
 .option pop
 
+#ifndef RT_USING_SMP
     /* removed SMP support here */
     la   sp, __stack_start__
     li   t0, __STACKSIZE__
     add  sp, sp, t0
+#else
+    mv   t0, a0
+    /* calculate stack offset: hartid * __STACKSIZE__ */
+    li   t1, __STACKSIZE__
+    mul  t0, t0, t1        /* t0 = hartid * __STACKSIZE__ */
+    
+    /* set stack pointer */
+    la   sp, __stack_start__
+    add  sp, sp, t0        /* sp = __stack_start__ + hartid * __STACKSIZE__ */
+    add  sp, sp, t1        /* sp += __STACKSIZE__ (point to stack top) */
+
+    mv   t0, a0
+    lw   t1, boot_hartid
+    bne  t0, t1, secondary_cpu_entry
+    li x10,0
+#endif /* RT_USING_SMP */
 
     /**
      * sscratch is always zero on kernel mode
