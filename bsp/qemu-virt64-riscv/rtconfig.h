@@ -73,10 +73,11 @@
 /* end of rt_strnlen options */
 /* end of klibc options */
 #define RT_NAME_MAX 24
-#define RT_CPUS_NR 1
+#define RT_USING_SMP
+#define RT_CPUS_NR 4
 #define RT_ALIGN_SIZE 8
-#define RT_THREAD_PRIORITY_32
-#define RT_THREAD_PRIORITY_MAX 32
+#define RT_THREAD_PRIORITY_256
+#define RT_THREAD_PRIORITY_MAX 256
 #define RT_TICK_PER_SECOND 100
 #define RT_USING_OVERFLOW_CHECK
 #define RT_USING_HOOK
@@ -84,6 +85,7 @@
 #define RT_USING_IDLE_HOOK
 #define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 16384
+#define SYSTEM_THREAD_STACK_SIZE 16384
 #define RT_USING_TIMER_SOFT
 #define RT_TIMER_THREAD_PRIO 4
 #define RT_TIMER_THREAD_STACK_SIZE 16384
@@ -193,6 +195,7 @@
 #define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_SERIAL_BYPASS
 #define RT_USING_CPUTIME
 #define RT_USING_CPUTIME_RISCV
 #define CPUTIME_TIMER_FREQ 10000000
@@ -254,6 +257,7 @@
 
 #define RT_USING_SAL
 #define SAL_INTERNET_CHECK
+#define SOCKET_TABLE_STEP_LEN 4
 
 /* Docking with protocol stacks */
 
@@ -319,6 +323,9 @@
 
 /* Utilities */
 
+#define RT_USING_UTEST
+#define UTEST_THR_STACK_SIZE 4096
+#define UTEST_THR_PRIORITY 20
 #define RT_USING_RESOURCE_ID
 #define RT_USING_ADT
 #define RT_USING_ADT_AVL
@@ -344,6 +351,67 @@
 
 /* RT-Thread Utestcases */
 
+#define RT_USING_UTESTCASES
+
+/* Kernel Core */
+
+
+/* SMP Test */
+
+#define RT_UTEST_SMP_AFFFINITY
+#define RT_UTEST_SMP_ASSIGNED_IDLE_CORE
+#define RT_UTEST_SMP_INTERRUPT_PRI
+#define RT_UTEST_SMP_SPINLOCK
+#define RT_UTEST_SMP_THREAD_PREEMPTION
+/* end of SMP Test */
+/* end of Kernel Core */
+
+/* Kernel Components */
+
+/* Drivers */
+
+
+/* IPC Test */
+
+/* end of IPC Test */
+
+/* Serial Test */
+
+/* end of Serial Test */
+
+/* SMP-Call Test */
+
+/* end of SMP-Call Test */
+/* end of Drivers */
+
+/* File System */
+
+/* end of File System */
+
+/* CPP11 */
+
+/* end of CPP11 */
+
+/* LwIP */
+
+/* end of LwIP */
+
+/* Netdev */
+
+/* end of Netdev */
+
+/* Utest Framework */
+
+/* end of Utest Framework */
+/* end of Kernel Components */
+
+/* Memory Management Subsytem Testcase */
+
+/* end of Memory Management Subsytem Testcase */
+
+/* Tmpfs Testcase */
+
+/* end of Tmpfs Testcase */
 /* end of RT-Thread Utestcases */
 
 /* RT-Thread online packages */
@@ -467,6 +535,10 @@
 /* GD32 Drivers */
 
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */

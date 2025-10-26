@@ -136,6 +136,13 @@ static volatile int nested = 0;
 #define EXIT_TRAP  nested -= 1
 #define CHECK_NESTED_PANIC(cause, tval, epc, eframe) \
     if (nested != 1) handle_nested_trap_panic(cause, tval, epc, eframe)
+#else
+static volatile int nested[RT_CPUS_NR] = {0};
+#define ENTER_TRAP nested[rt_hw_cpu_id()] += 1
+#define EXIT_TRAP nested[rt_hw_cpu_id()] -= 1
+#define CHECK_NESTED_PANIC(cause, tval, epc, eframe) \
+    if (nested[rt_hw_cpu_id()] != 1) \
+        handle_nested_trap_panic(cause, tval, epc, eframe)
 #endif /* RT_USING_SMP */
 
 static const char *get_exception_msg(int id)
@@ -312,6 +319,13 @@ void handle_trap(rt_ubase_t scause, rt_ubase_t stval, rt_ubase_t sepc,
         /* supervisor timer */
         rt_interrupt_enter();
         tick_isr();
+        rt_interrupt_leave();
+    }
+    else if ((SCAUSE_INTERRUPT | SCAUSE_S_SOFTWARE_INTR) == scause)
+    {
+        /* supervisor software interrupt */
+        rt_interrupt_enter();
+        rt_hw_ipi_handler();
         rt_interrupt_leave();
     }
     else
