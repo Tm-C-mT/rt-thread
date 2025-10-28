@@ -154,27 +154,6 @@ void rt_hw_set_process_id(int pid)
 }
 
 #ifdef RT_USING_SMP
-/**
- * @brief Check and clear per-cpu irq switch flag
- *
- * This helper is used by the interrupt exit assembly to query whether a
- * pending IRQ-time context switch has been requested for this hart. It
- * clears the flag when found and returns 1. Returns 0 otherwise.
- */
-int rt_percpu_check_irq_switch_flag(void)
-{
-    struct rt_cpu *pcpu = rt_cpu_self();
-    struct rt_thread *current_thread;
-    if (pcpu->irq_switch_flag)
-    {
-        current_thread = pcpu->current_thread;
-        
-        return 1;
-    }
-
-    return 0;
-}
-
 /*
  * Boot secondary harts using the SBI HSM hart_start call.
  * NOTE: this is a minimal implementation that uses the kernel _start

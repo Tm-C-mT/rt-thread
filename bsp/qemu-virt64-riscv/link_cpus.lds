@@ -1,1 +1,1 @@
-RT_CPUS_NR = 2;
+RT_CPUS_NR = 8;

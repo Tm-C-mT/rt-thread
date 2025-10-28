@@ -18,7 +18,7 @@
 
 struct rt_irq_desc irq_desc[MAX_HANDLERS];
 #ifdef RT_USING_SMP
-struct rt_irq_desc ipi_desc[MAX_HANDLERS];
+struct rt_irq_desc ipi_desc[RT_MAX_IPI];
 uint8_t ipi_vectors[RT_CPUS_NR] = {0};
 #endif
 
@@ -181,7 +181,7 @@ void rt_hw_ipi_init(void)
     int idx = 0, cpuid = rt_cpu_get_id();
     ipi_vectors[cpuid] = 0;
     /* init exceptions table */
-    for (idx = 0; idx < MAX_HANDLERS; idx++)
+    for (idx = 0; idx < RT_MAX_IPI; idx++)
     {
         ipi_desc[idx].handler = RT_NULL;
         ipi_desc[idx].param = RT_NULL;
@@ -195,7 +195,7 @@ void rt_hw_ipi_init(void)
 
 void rt_hw_ipi_handler_install(int ipi_vector, rt_isr_handler_t ipi_isr_handler)
 {
-    if(ipi_vector < MAX_HANDLERS)
+    if(ipi_vector < RT_MAX_IPI)
     {
         if (ipi_isr_handler != RT_NULL)
         {
@@ -214,7 +214,7 @@ void rt_hw_ipi_handler(void)
     {
         int bitpos = __builtin_ctz(ipi_vector);
         ipi_vector &= ~(1 << bitpos);
-        if (bitpos < MAX_HANDLERS && ipi_desc[bitpos].handler != RT_NULL)
+        if (bitpos < RT_MAX_IPI && ipi_desc[bitpos].handler != RT_NULL)
         {
             /* call the irq service routine */
             ipi_desc[bitpos].handler(bitpos, ipi_desc[bitpos].param);

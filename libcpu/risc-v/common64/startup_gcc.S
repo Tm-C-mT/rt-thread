@@ -31,7 +31,6 @@ _start:
         .dword 0
 1:
     /* save hartid */
-    csrw satp, a0
     la t0, boot_hartid                /* global varible rt_boot_hartid */
     lw   t2, (t0)                     /* 读取 boot_hartid 当前值到 t2 */
     li   t3, 0xdeadbeef               /* 将比较值 0xdeadbeef 加载到 t3 */
@@ -100,6 +99,7 @@ skip_hartid_save:
     li   t0, __STACKSIZE__
     add  sp, sp, t0
 #else
+    csrw   satp, a0
     mv   t0, a0
     /* calculate stack offset: hartid * __STACKSIZE__ */
     li   t1, __STACKSIZE__
