@@ -1,8 +1,11 @@
 QEMU_CMD="qemu-system-riscv64 -nographic -machine virt -m 256M -kernel rtthread.bin -s -S"
 
 if grep -q "#define RT_USING_SMP" ./rtconfig.h 2>/dev/null; then
-	hart_num=$(grep "#define RT_CPUS_NR" ./rtconfig.h | awk '{print $3}')
-	QEMU_CMD="$QEMU_CMD -smp $hart_num"
+    hart_num=$(grep "RT_CPUS_NR = [0-9]*;" ./link_cpus.lds | awk -F'[=;]' '{gsub(/ /, "", $2); print $2}')
+    if [ -z "$hart_num" ]; then
+        hart_num=1
+    fi
+    QEMU_CMD="$QEMU_CMD -smp $hart_num"
 fi
 
 QEMU_CMD="$QEMU_CMD \

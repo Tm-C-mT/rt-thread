@@ -74,7 +74,7 @@
 /* end of klibc options */
 #define RT_NAME_MAX 24
 #define RT_USING_SMP
-#define RT_CPUS_NR 1
+#define RT_CPUS_NR 2
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_256
 #define RT_THREAD_PRIORITY_MAX 256
